@@ -10,10 +10,10 @@ import argparse
 import contextlib
 import os
 import re
+import signal
 import socketserver
 import subprocess
 import sys
-
 
 class Wrapper:
     def __init__(self, port, use_mitmweb, extra_arguments=None):
@@ -163,6 +163,13 @@ class Wrapper:
                 print(f"Using random port {port}...")
 
         wrapper = cls(port=port, use_mitmweb=args.web, extra_arguments=extra_arguments)
+
+        def handler(signum, frame):
+            print("Cleaning up proxy settings...")
+            wrapper.toggle_proxy()
+
+        signal.signal(signal.SIGINT, handler)
+
 
         if args.toggle:
             wrapper.toggle_proxy()
